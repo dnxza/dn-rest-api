@@ -1,2 +1,2 @@
 # dn-rest-api
-RESTful API with Node.js
+RESTful API with Node.js & TypeScript
