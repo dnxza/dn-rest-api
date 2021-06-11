@@ -6,7 +6,7 @@ import { env } from 'process'
 const pino = require('pino')
 
 const log = pino({
-  prettyPrint: { colorize: true, translateTime: 'SYS:standard' }
+  prettyPrint: { colorize: true, translateTime: 'SYS:standard', singleLine: true }
 })
 
 var opt = { logger: false }
