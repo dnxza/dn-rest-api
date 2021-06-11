@@ -3,26 +3,25 @@
 import fastify from 'fastify'
 import { env } from 'process'
 
-var opt = { logger: false };
+const pino = require('pino')
+
+const log = pino({
+  prettyPrint: { colorize: true, translateTime: 'SYS:standard' }
+})
+
+var opt = { logger: false }
 
 if (env.NODE_ENV === 'development')
-    opt.logger = true;
+    opt.logger = log   
 
 const server = fastify(opt)
 
-const port = env.PORT || 3000 as number;
-const host = env.HOST || '127.0.0.1' as string;
+const port = env.PORT || 3000 as number
+const host = env.HOST || '127.0.0.1' as string
 
-server.register(require('./routes/v1/test'), { prefix: '/v1' })
+server.register(require('./routes'), {})
 
-server.setNotFoundHandler({
-    preValidation: (req, reply, done) => {
-        done()
-    },
-    preHandler: (req, reply, done) => {
-        done()
-    }
-}, function (request, reply) {
+server.setNotFoundHandler(function (request, reply) {
     reply.status(404).send({ success: false, msg: 'not found' })
 })
 
@@ -31,5 +30,4 @@ server.listen(port, host, (err, address) => {
         console.error(err)
         process.exit(1)
     }
-    console.log(`Server listening at ${address}`)
 })

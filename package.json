@@ -31,7 +31,8 @@
         "fastify": "^3.17.0",
         "fastify-plugin": "^3.0.0",
         "jsonwebtoken": "^8.5.1",
-        "mongoose": "^5.12.12"
+        "mongoose": "^5.12.12",
+        "pino-pretty": "^5.0.2"
     },
     "devDependencies": {
         "@types/bcrypt": "^5.0.0",
