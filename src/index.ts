@@ -1,31 +1,48 @@
 // index.ts
 
-import fastify from 'fastify'
+import f, { FastifyInstance } from 'fastify'
+import jwt from 'fastify-jwt'
+import mongo from 'fastify-mongodb'
+import pino from 'pino';
+import { randomBytes } from 'crypto';
 import { env } from 'process'
-
-const pino = require('pino')
+import { config } from './config';
+import error from './error'
 
 const log = pino({
-  prettyPrint: { colorize: true, translateTime: 'SYS:standard', singleLine: true }
+    prettyPrint: { colorize: true, translateTime: 'SYS:standard', singleLine: true }
 })
 
-var opt = { logger: false }
-
+var opt = {}
 if (env.NODE_ENV === 'development')
-    opt.logger = log   
+    opt = { logger: log }
 
-const server = fastify(opt)
+const fastify = error(f(opt))
 
-const port = env.PORT || 3000 as number
-const host = env.HOST || '127.0.0.1' as string
+const host = env.HOST || config.app.host || '127.0.0.1' as string
+const port = env.PORT || config.app.port || 3000 as number
+const db = env.DB || config.db.url || 'mongodb://127.0.0.1:27017/api' as string
+const jwt_key = env.JWT_KEY || config.jwt.key || randomBytes(256).toString() as string
 
-server.register(require('./routes'), {})
-
-server.setNotFoundHandler(function (request, reply) {
-    reply.status(404).send({ success: false, msg: 'not found' })
+fastify.register(mongo, {
+    forceClose: true,
+    url: db
 })
 
-server.listen(port, host, (err, address) => {
+fastify.register(jwt, {
+    secret: jwt_key,
+    decode: { complete: true },
+    sign: {
+        algorithm: 'HS256',
+        issuer: 'api.dnratthee.me',
+        expiresIn: "7d"
+    },
+    verify: { issuer: 'api.dnratthee.me' }
+})
+
+fastify.register(require('./routes'), {})
+
+fastify.listen(port, host, (err, address) => {
     if (err) {
         console.error(err)
         process.exit(1)
