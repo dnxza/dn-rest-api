@@ -1,12 +1,11 @@
 // index.ts
 
-import f, { FastifyInstance } from 'fastify'
+import f from 'fastify'
 import jwt from 'fastify-jwt'
 import mongo from 'fastify-mongodb'
 import pino from 'pino';
-import { randomBytes } from 'crypto';
 import { env } from 'process'
-import { config } from './config';
+import { config } from './config'
 import error from './error'
 
 const log = pino({
@@ -19,10 +18,10 @@ if (env.NODE_ENV === 'development')
 
 const fastify = error(f(opt))
 
-const host = env.HOST || config.app.host || '127.0.0.1' as string
-const port = env.PORT || config.app.port || 3000 as number
-const db = env.DB || config.db.url || 'mongodb://127.0.0.1:27017/api' as string
-const jwt_key = env.JWT_KEY || config.jwt.key || randomBytes(256).toString() as string
+const host = config.app.host
+const port = config.app.port
+const db = config.db.url
+const jwt_key = config.jwt.key
 
 fastify.register(mongo, {
     forceClose: true,
@@ -34,10 +33,10 @@ fastify.register(jwt, {
     decode: { complete: true },
     sign: {
         algorithm: 'HS256',
-        issuer: 'api.dnratthee.me',
+        issuer: host,
         expiresIn: "7d"
     },
-    verify: { issuer: 'api.dnratthee.me' }
+    verify: { issuer: host }
 })
 
 fastify.register(require('./routes'), {})
