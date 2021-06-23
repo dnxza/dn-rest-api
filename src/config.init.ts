@@ -11,7 +11,7 @@ export const config = {
 		key: env.JWT_KEY || '<JWT_KEY>'
 	},
 	db: {
-		url: env.DB || 'mongodb://<USER>:<PASS>@localhost:27017/<DB>'
+		url: env.DB || 'mongodb://<USER>:<PASS>@<HOST>:27017/<DB>'
 	},
 	oauth2: {
 		google: {
