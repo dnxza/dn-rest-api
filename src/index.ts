@@ -1,35 +1,49 @@
 // index.ts
 
-import fastify from 'fastify'
+import f from 'fastify'
+import jwt from 'fastify-jwt'
+import mongo from 'fastify-mongodb'
+import pino from 'pino';
 import { env } from 'process'
+import { config } from './config'
+import error from './error'
 
-var opt = { logger: false };
-
-if (env.NODE_ENV === 'development')
-    opt.logger = true;
-
-const server = fastify(opt)
-
-const port = env.PORT || 3000 as number;
-const host = env.HOST || '127.0.0.1' as string;
-
-server.register(require('./routes/v1/test'), { prefix: '/v1' })
-
-server.setNotFoundHandler({
-    preValidation: (req, reply, done) => {
-        done()
-    },
-    preHandler: (req, reply, done) => {
-        done()
-    }
-}, function (request, reply) {
-    reply.status(404).send({ success: false, msg: 'not found' })
+const log = pino({
+    prettyPrint: { colorize: true, translateTime: 'SYS:standard', singleLine: true }
 })
 
-server.listen(port, host, (err, address) => {
+var opt = {}
+if (env.NODE_ENV === 'development')
+    opt = { logger: log }
+
+const fastify = error(f(opt))
+
+const host = config.app.host
+const port = config.app.port
+const db = config.db.url
+const jwt_key = config.jwt.key
+
+fastify.register(mongo, {
+    forceClose: true,
+    url: db
+})
+
+fastify.register(jwt, {
+    secret: jwt_key,
+    decode: { complete: true },
+    sign: {
+        algorithm: 'HS256',
+        issuer: host,
+        expiresIn: "7d"
+    },
+    verify: { issuer: host }
+})
+
+fastify.register(require('./routes'), {})
+
+fastify.listen(port, host, (err, address) => {
     if (err) {
         console.error(err)
         process.exit(1)
     }
-    console.log(`Server listening at ${address}`)
 })

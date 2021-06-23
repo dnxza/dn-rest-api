@@ -6,7 +6,9 @@
         "ts": "node -r ts-node/register"
     },
     "env": {
-        "NODE_ENV": "development"
+        "NODE_ENV": "development",
+        "JWT_KEY": "7638792F423F4528482B4D6251655468566D597133743677397A24432646294A",
+        "DB": "mongodb://api:7638792F423F45@127.0.0.1:27017/api"
     },
     "ext": "js,json,ts"
 }
