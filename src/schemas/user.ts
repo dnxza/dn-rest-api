@@ -1,3 +1,5 @@
+// schemas/user.ts
+
 export const userReq = {
     type: 'object',
     properties: {
